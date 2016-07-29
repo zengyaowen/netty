@@ -27,9 +27,11 @@ public enum InternetProtocolFamily {
     IPv6(Inet6Address.class);
 
     private final Class<? extends InetAddress> addressType;
+    private final int addressNumber;
 
     InternetProtocolFamily(Class<? extends InetAddress> addressType) {
         this.addressType = addressType;
+        addressNumber = addressNumber(addressType);
     }
 
     /**
@@ -37,5 +39,36 @@ public enum InternetProtocolFamily {
      */
     public Class<? extends InetAddress> addressType() {
         return addressType;
+    }
+
+    /**
+     * Returns the <a href="http://www.iana.org/assignments/address-family-numbers/address-family-numbers.xhtml">
+     *     address number</a> of the family.
+     */
+    public int addressNumber() {
+        return addressNumber;
+    }
+
+    private static int addressNumber(Class<? extends InetAddress> addressType) {
+        if (addressType.isAssignableFrom(Inet4Address.class)) {
+            return 1;
+        } else if (addressType.isAssignableFrom(Inet6Address.class)) {
+            return 2;
+        } else {
+            throw new IllegalArgumentException("addressType " + addressType + " not supported");
+        }
+    }
+
+    /**
+     * Returns the {@link InternetProtocolFamily} for the given {@link InetAddress}.
+     */
+    public static InternetProtocolFamily familyOf(InetAddress address) {
+        if (address instanceof Inet4Address) {
+            return IPv4;
+        }
+        if (address instanceof Inet6Address) {
+            return IPv6;
+        }
+        throw new IllegalArgumentException("address " + address + " not supported");
     }
 }
